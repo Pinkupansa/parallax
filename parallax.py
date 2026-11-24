@@ -220,16 +220,12 @@ def validate(reg: dict, r: Report, base: Path | None = None) -> None:
         st = p.get("status")
         if st not in statuses:
             r.err(f"{where}: unknown status {st!r} ({' | '.join(statuses)})")
-        for field in ("importance", "chance"):
+        for field in ("importance", "chance"):  # optional priority ratings
             v = p.get(field)
-            if v is None:
-                r.warn(f"{where}: {field} not rated")
-            elif not (isinstance(v, int) and 1 <= v <= 3):
+            if v is not None and not (isinstance(v, int) and 1 <= v <= 3):
                 r.err(f"{where}: {field} must be an integer 1..3 (got {v!r})")
         eff = p.get("effort")
-        if eff is None:
-            r.warn(f"{where}: effort not estimated")
-        elif eff not in ("S", "M", "L"):
+        if eff is not None and eff not in ("S", "M", "L"):
             r.err(f"{where}: effort must be S, M or L (got {eff!r})")
         if st in ("idea", "ongoing") and not p.get("next"):
             r.warn(f"{where}: active lead without a 'next' action")

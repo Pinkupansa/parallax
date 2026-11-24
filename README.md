@@ -24,7 +24,7 @@ Parallax has three levels.
 3. **Visualization (`parallax.py serve`).** A local web interface displays the registry: the leads to work on now, a tree of themes, tasks by lead and by person, the inbox and the journal, and an optional priority matrix. Documents linked to a lead open in a Markdown/LaTeX reader at the referenced section. The registry can be edited from the interface; projects can add their own views as JavaScript extensions.
 
 ## Views
-- **Overview**: key figures, "Do now" (pinned leads, then the highest-priority active leads if they are rated), progress by theme, recent activity, extension sections.
+- **Overview**: key figures, "Do now" (pinned leads, then active leads: by priority if they are rated, otherwise the most recently updated), progress by theme, recent activity, extension sections.
 - **Tree** of themes and sub-leads; **Tasks** (with who does what: the human or an agent); **Inbox**; **Journal**; sortable **List**.
 - **Matrix**: optional importance × chance ratings, as a rough aid to prioritize.
 - **Reader**: documents listed on a lead open in a built-in Markdown + MathJax reader, at the right section (`notes/x.md#Section`), or PDFs at the right page (`paper.pdf#page=4`).

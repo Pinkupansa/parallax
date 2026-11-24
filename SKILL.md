@@ -85,7 +85,7 @@ journal:
 
 **French registries.** Registries written with the French schema of Parallax 2 (`projet`, `pistes`, `statut: en-cours`, `prochaine`, `arret`, `texte`…) are read transparently and written back in French. Use the language the file already uses.
 
-**Displayed priority** = importance × chance (1 to 9). Ties are broken by the smallest effort, then by the most recent update. The "Do now" cards show pinned leads, then the active leads (`idea`, `ongoing`) of highest priority.
+**Displayed priority** = importance × chance (1 to 9). Ties are broken by the smallest effort, then by the most recent update. The "Do now" cards show pinned leads, then active leads (`idea`, `ongoing`): rated leads by priority, then unrated ones by most recent update. Unrated leads are fine.
 
 ## Rules
 
