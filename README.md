@@ -78,6 +78,7 @@ Registries written with the French schema of Parallax 2 (`projet`, `pistes`, `st
 - `init.html`: the "New project" page, shown when there is no registry yet.
 - `vendor/js-yaml.min.js`: YAML in the browser (js-yaml 4.1.0, MIT licence).
 - `vendor/marked.min.js`: Markdown rendering for the reader (marked 12.0.2, MIT licence).
+- `vendor/fonts/`: Mona Sans, the interface font, embedded in every page (latin subset, SIL Open Font License 1.1).
 - `SKILL.md`: guide for agents. `example/`: minimal registry.
 
 ## Example scenario

@@ -159,4 +159,6 @@ Parallax.hideFields(["my_field"]);                         // do not show this r
 - `data`: the normalized registry, with `project`, `leads`, `journal`, `inbox`, `statuses`, `scales`;
 - helpers: `visibleLeads()` (after filters and search), `select(id)`, `status(id)`, `esc(s)`, `text(s)` (escapes, keeps LaTeX), `priority(p)`, `chain(id)`, `typeset(el)`, `icon(name)`.
 
+For styling, reuse the page's classes: `h2.sec` for a section heading, `card pad` for a quiet panel, `card pad hi` for a panel to put forward (raised, like the "Do now" cards).
+
 Extension-specific data goes into free fields of the leads, or under a key of `project`. Example: the One Bit project's "coverage on an axis" view reads `project.axe` and the `couverture` field of each lead.

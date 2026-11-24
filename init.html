@@ -6,21 +6,22 @@
 <meta name="color-scheme" content="light dark">
 <title>New project — Parallax</title>
 <style>
-:root{--bg:#ECEDEF;--card:#FBFBFC;--elev:#FFFFFF;--fill2:#F0F1F3;--line:#D3D6DB;--line2:#BCC0C6;--label:#25282C;--label2:#5D636B;--label3:#8C9199;--sep:#DADDE1;
-  --acc:#3E444C;--acc-t:rgba(62,68,76,.07);--red:#C0412F;--green:#1F8A5B;
-  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,monospace}
-@media (prefers-color-scheme:dark){:root{--bg:#18191B;--card:#212326;--elev:#2A2D31;--fill2:#26292C;--line:#363A3F;--line2:#4A4F56;--label:#E4E6E9;--label2:#A2A7AE;--label3:#737981;--sep:#33363B;--acc:#D3D6DB;--acc-t:rgba(211,214,219,.08);--red:#E8796B;--green:#5BC28F}}
+/*__FONTS__*/
+:root{--bg:#FCFCFB;--card:#FFFFFF;--elev:#FFFFFF;--fill2:#F6F6F4;--line:#E4E4E0;--line2:#CDCDC8;--label:#1D1E21;--label2:#585B61;--label3:#8C8F95;--sep:#ECECE8;
+  --acc:#2E3A59;--acc-t:rgba(46,58,89,.07);--red:#A8432E;--green:#4E7A3A;--relief:0 1px 0 rgba(255,255,255,.9) inset,2px 3px 0 rgba(46,58,89,.08),0 1px 2px rgba(29,30,33,.05);
+  --font:"Mona Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#101113;--card:#17181B;--elev:#1C1D21;--fill2:#1A1B1F;--line:#2A2B30;--line2:#3D3F45;--label:#E8E9EB;--label2:#A2A5AB;--label3:#73767D;--sep:#232429;--acc:#B4C2E6;--acc-t:rgba(180,194,230,.09);--red:#E08A72;--green:#8DB877;--relief:2px 3px 0 rgba(0,0,0,.6)}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--label);font:14px/1.45 var(--font);-webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:6vh 16px}
+body{margin:0;background:var(--bg);color:var(--label);font:14.5px/1.5 var(--font);display:flex;justify-content:center;padding:6vh 16px}
 main{width:min(620px,100%)}
 .brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
-.mk{width:28px;height:28px;border-radius:7px;background:linear-gradient(150deg,#FAFBFC 0%,#D5D8DD 55%,#AEB3BA 100%);border:1px solid #A9AEB5;display:grid;place-items:center}
-.mk svg{width:17px;height:17px}.mk .l{fill:none;stroke:#3A3F46;stroke-width:1.7;stroke-linejoin:round}.mk circle{fill:#3A3F46}
-.brand b{font-size:16px;font-weight:650}
-h1{font-size:24px;font-weight:650;letter-spacing:-.02em;margin:0 0 6px}
+.mk{width:26px;height:26px;border-radius:5px;background:var(--acc);display:grid;place-items:center;box-shadow:1px 2px 0 rgba(46,58,89,.18)}
+.mk svg{width:17px;height:17px}.mk .l{fill:none;stroke:var(--bg);stroke-width:1.7;stroke-linejoin:round}.mk circle{fill:var(--bg)}
+.brand b{font-size:14px;font-weight:700;color:var(--label2)}
+h1{font-size:24px;font-weight:700;margin:0 0 6px}
 .sub{color:var(--label2);margin:0 0 20px}
 code{font-family:var(--mono);font-size:.92em;background:var(--fill2);border:1px solid var(--sep);padding:0 4px;border-radius:4px}
-.grp{background:var(--card);border:1px solid var(--line);border-radius:8px;margin:0 0 14px;overflow:hidden}
+.grp{background:var(--elev);border:1px solid var(--line2);border-radius:6px;box-shadow:var(--relief);margin:0 0 14px;overflow:hidden}
 .r{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;padding:9px 14px;border-top:1px solid var(--sep);min-height:42px}
 .r:first-child{border-top:0}.r.top{align-items:start}
 label.k{font-size:13px;color:var(--label2)}
@@ -32,7 +33,7 @@ textarea{resize:vertical;min-height:40px}
 .opt b{font-weight:600}.opt small{display:block;color:var(--label2);font-size:12.5px;margin-top:1px}
 .opt.off{opacity:.5}
 .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
-.btn{height:30px;padding:0 14px;border-radius:6px;border:1px solid var(--acc);color:var(--acc);background:var(--elev);font:inherit;font-weight:600;cursor:pointer}
+.btn{height:30px;padding:0 14px;border-radius:4px;border:1px solid var(--acc);color:var(--acc);background:var(--elev);font:inherit;font-weight:600;cursor:pointer}
 .btn:hover{background:var(--acc-t)}.btn[disabled]{opacity:.45;cursor:default}
 .msg{margin:12px 0 0;font-size:13px}.msg.err{color:var(--red)}
 .note{margin-top:22px;font-size:13px;color:var(--label2);line-height:1.5}

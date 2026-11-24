@@ -14,6 +14,7 @@ Dependency: PyYAML (python3 -m pip install --user pyyaml).
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime as dt
 import json
 import re
@@ -131,11 +132,11 @@ def split_doc(d: str) -> tuple[str, str]:
     return path, anchor
 
 
-DEFAULT_STATUSES = {  # four statuses; two hues (steel blue, green) and silver neutrals
-    "idea":    {"label": "Idea",    "color": "#7D858F", "active": True, "ring": True},
-    "ongoing": {"label": "Ongoing", "color": "#2B68B0", "active": True},
-    "done":    {"label": "Done",    "color": "#1F8A5B", "active": False},
-    "stopped": {"label": "Stopped", "color": "#BFC5CC", "active": False},
+DEFAULT_STATUSES = {  # four statuses: plum idea, ink-blue ongoing, green done, grey stopped
+    "idea":    {"label": "Idea",    "color": "#8C5A8F", "active": True, "ring": True},
+    "ongoing": {"label": "Ongoing", "color": "#2F4F8F", "active": True},
+    "done":    {"label": "Done",    "color": "#4E7A3A", "active": False},
+    "stopped": {"label": "Stopped", "color": "#C4C6CA", "active": False},
 }
 DEFAULT_SCALES = {
     "importance": {1: "Useful", 2: "Important", 3: "Decisive"},
@@ -443,8 +444,28 @@ def render_page(source: Path, reg: dict, data: dict, server: dict | None = None)
             .replace("/*__SERVER__*/null", srv)
             .replace("/*__JSYAML__*/", jsyaml)
             .replace("/*__MARKED__*/", marked)
+            .replace("/*__FONTS__*/", font_faces())
             .replace("<!--__EXTENSIONS__-->", "\n".join(exts))
             .replace("__TITLE__", f"{title} — {NAME}"))
+
+
+FONTS = [  # Mona Sans (SIL OFL 1.1), latin subset, embedded so every machine renders the same
+    ("mona-sans-latin-400-normal.woff2", "400", "normal"),
+    ("mona-sans-latin-400-italic.woff2", "400", "italic"),
+    ("mona-sans-latin-600-normal.woff2", "600", "normal"),
+    ("mona-sans-latin-700-normal.woff2", "700", "normal"),
+]
+
+
+def font_faces() -> str:
+    out = []
+    for name, weight, style in FONTS:
+        f = HERE / "vendor" / "fonts" / name
+        if f.exists():
+            b64 = base64.b64encode(f.read_bytes()).decode("ascii")
+            out.append('@font-face{font-family:"Mona Sans";font-style:%s;font-weight:%s;font-display:swap;'
+                       'src:url(data:font/woff2;base64,%s) format("woff2")}' % (style, weight, b64))
+    return "\n".join(out)
 
 
 def show(r: Report) -> None:
@@ -704,7 +725,8 @@ def serve(source: Path, port: int, open_browser: bool) -> int:
                     ctx = project_context(base, source.name)
                     ctx["token"] = token
                     page = INIT_PAGE.read_text(encoding="utf-8").replace(
-                        "/*__CONTEXT__*/null", json.dumps(ctx, ensure_ascii=False).replace("</", "<\\/"))
+                        "/*__CONTEXT__*/null", json.dumps(ctx, ensure_ascii=False).replace("</", "<\\/")).replace(
+                        "/*__FONTS__*/", font_faces())
                     return self._send(200, page.encode("utf-8"), "text/html; charset=utf-8")
                 reg, data, r = analyse(source)
                 if reg is None:
