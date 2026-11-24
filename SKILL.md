@@ -24,7 +24,8 @@ The researcher must see at a glance what has been explored, what matters, and wh
 From the registry's folder:
 
 ```bash
-python3 <module>/parallax.py serve           # open Parallax (browser, editable)
+python3 <module>/parallax.py init --title "…" --owner A.B. [--agents] [--hook] [--launcher]   # new project
+python3 <module>/parallax.py serve           # open Parallax (browser, editable; creation page if no registry)
 python3 <module>/parallax.py build           # write the parallax.html snapshot
 python3 <module>/parallax.py check           # validate without writing
 python3 <module>/parallax.py check --git     # + refuse leads or journal entries deleted since HEAD

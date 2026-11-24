@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>New project — Parallax</title>
+<style>
+:root{--bg:#ECEDEF;--card:#FBFBFC;--elev:#FFFFFF;--fill2:#F0F1F3;--line:#D3D6DB;--line2:#BCC0C6;--label:#25282C;--label2:#5D636B;--label3:#8C9199;--sep:#DADDE1;
+  --acc:#3E444C;--acc-t:rgba(62,68,76,.07);--red:#C0412F;--green:#1F8A5B;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#18191B;--card:#212326;--elev:#2A2D31;--fill2:#26292C;--line:#363A3F;--line2:#4A4F56;--label:#E4E6E9;--label2:#A2A7AE;--label3:#737981;--sep:#33363B;--acc:#D3D6DB;--acc-t:rgba(211,214,219,.08);--red:#E8796B;--green:#5BC28F}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--label);font:14px/1.45 var(--font);-webkit-font-smoothing:antialiased;display:flex;justify-content:center;padding:6vh 16px}
+main{width:min(620px,100%)}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.mk{width:28px;height:28px;border-radius:7px;background:linear-gradient(150deg,#FAFBFC 0%,#D5D8DD 55%,#AEB3BA 100%);border:1px solid #A9AEB5;display:grid;place-items:center}
+.mk svg{width:17px;height:17px}.mk .l{fill:none;stroke:#3A3F46;stroke-width:1.7;stroke-linejoin:round}.mk circle{fill:#3A3F46}
+.brand b{font-size:16px;font-weight:650}
+h1{font-size:24px;font-weight:650;letter-spacing:-.02em;margin:0 0 6px}
+.sub{color:var(--label2);margin:0 0 20px}
+code{font-family:var(--mono);font-size:.92em;background:var(--fill2);border:1px solid var(--sep);padding:0 4px;border-radius:4px}
+.grp{background:var(--card);border:1px solid var(--line);border-radius:8px;margin:0 0 14px;overflow:hidden}
+.r{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;padding:9px 14px;border-top:1px solid var(--sep);min-height:42px}
+.r:first-child{border-top:0}.r.top{align-items:start}
+label.k{font-size:13px;color:var(--label2)}
+input[type=text],textarea{width:100%;border:0;background:none;outline:none;color:var(--label);font:inherit;padding:2px 0}
+textarea{resize:vertical;min-height:40px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-top:1px solid var(--sep)}
+.opt:first-child{border-top:0}
+.opt input{margin:3px 0 0;accent-color:var(--acc);width:15px;height:15px}
+.opt b{font-weight:600}.opt small{display:block;color:var(--label2);font-size:12.5px;margin-top:1px}
+.opt.off{opacity:.5}
+.foot{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.btn{height:30px;padding:0 14px;border-radius:6px;border:1px solid var(--acc);color:var(--acc);background:var(--elev);font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--acc-t)}.btn[disabled]{opacity:.45;cursor:default}
+.msg{margin:12px 0 0;font-size:13px}.msg.err{color:var(--red)}
+.note{margin-top:22px;font-size:13px;color:var(--label2);line-height:1.5}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><span class="mk" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="l" d="M5 18.5L12 6.5L19 18.5"/><circle cx="5" cy="18.5" r="2.3"/><circle cx="19" cy="18.5" r="2.3"/><circle cx="12" cy="6.5" r="2.6"/></svg></span><b>Parallax</b></div>
+  <h1>New project</h1>
+  <p class="sub" id="where"></p>
+  <form id="f">
+    <div class="grp">
+      <div class="r"><label class="k" for="title">Title</label><input type="text" id="title" required placeholder="The central question of the project"></div>
+      <div class="r top"><label class="k" for="description">Description</label><textarea id="description" rows="2" placeholder="Optional; LaTeX $…$ is rendered"></textarea></div>
+      <div class="r"><label class="k" for="owner">Owner</label><input type="text" id="owner" placeholder="Your initials (author of your journal entries)"></div>
+      <div class="r"><label class="k" for="theme">First theme</label><input type="text" id="theme" placeholder="Optional, e.g. Literature"></div>
+    </div>
+    <div class="grp" id="opts">
+      <label class="opt"><input type="checkbox" id="agents" checked><span><b>Agent instructions</b><small id="agents-h"></small></span></label>
+      <label class="opt" id="hook-row"><input type="checkbox" id="hook"><span><b>Git guardrail</b><small id="hook-h"></small></span></label>
+      <label class="opt"><input type="checkbox" id="launcher"><span><b>macOS launcher</b><small>Adds <code>Parallax.command</code>: double-click to open Parallax on this project.</small></span></label>
+    </div>
+    <div class="foot"><button class="btn" id="go" type="submit">Create project</button></div>
+    <p class="msg" id="msg"></p>
+  </form>
+  <p class="note">Parallax writes plain files that you and your agents can also edit by hand. If the folder already contains notes, you can then ask an agent: <i>"Read the notes and propose leads for <span id="regname"></span>, following SKILL.md."</i></p>
+</main>
+<script>
+const C=/*__CONTEXT__*/null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+$("#where").innerHTML=`No <code>${esc(C.registry)}</code> in <code>${esc(C.folder)}</code> yet. Parallax will create it, with an <code>INBOX.md</code> for raw ideas.`;
+$("#regname").textContent=C.registry;
+const initials=n=>{const w=String(n||"").trim().split(/\s+/).filter(Boolean);return w.length>1?w.map(x=>x[0].toUpperCase()+".").join(""):(w[0]||"");};
+$("#owner").value=initials(C.owner);
+$("#agents-h").innerHTML=C.inside?"Adds a Parallax section to <code>AGENTS.md</code> (read by most agents) and makes <code>CLAUDE.md</code> import it."
+  :"Copies the agent guide to <code>.parallax/SKILL.md</code>, adds a Parallax section to <code>AGENTS.md</code> and makes <code>CLAUDE.md</code> import it.";
+if(!C.git){$("#hook").disabled=true;$("#hook-row").classList.add("off");$("#hook-h").textContent="Unavailable: this folder is not a git repository.";}
+else if(!C.inside){$("#hook").disabled=true;$("#hook-row").classList.add("off");$("#hook-h").textContent="Unavailable: Parallax is not inside this project, so collaborators could not run the check.";}
+else{$("#hook").checked=true;$("#hook-h").innerHTML="Adds <code>.githooks/pre-commit</code>: a commit is refused if the registry is invalid or a lead or journal entry disappeared.";}
+$("#title").focus();
+$("#f").onsubmit=async e=>{e.preventDefault();const m=$("#msg");m.className="msg";m.textContent="";
+  const body={title:$("#title").value,description:$("#description").value,owner:$("#owner").value,theme:$("#theme").value,
+    agents:$("#agents").checked,hook:$("#hook").checked,launcher:$("#launcher").checked};
+  if(!body.title.trim()){m.className="msg err";m.textContent="A title is required.";return;}
+  $("#go").disabled=true;
+  try{const r=await fetch("/api/init",{method:"POST",headers:{"Content-Type":"application/json","X-Parallax-Token":C.token},body:JSON.stringify(body)});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(j.error||("error "+r.status));
+    m.textContent="Created: "+j.done.join("; ")+".";setTimeout(()=>location.reload(),900);}
+  catch(err){m.className="msg err";m.textContent="Could not create the project: "+(err.message||err);$("#go").disabled=false;}};
+</script>
+</body>
+</html>

@@ -49,20 +49,21 @@ It also defines five rituals, which the human invokes by name in a conversation 
 
 Requirements: Python ≥ 3.8, git, and PyYAML (`python3 -m pip install --user pyyaml`).
 
-1. **Add Parallax to your repository** and start from the example registry:
+1. **Add Parallax to your repository:**
    ```bash
    git submodule add https://github.com/Pinkupansa/parallax tools/parallax
-   cp tools/parallax/example/leads.yaml tools/parallax/example/INBOX.md .
    ```
-   Edit `leads.yaml`: project title, description, and `owner` (your initials).
-2. **Run it:**
+2. **Start it:**
    ```bash
-   python3 tools/parallax/parallax.py serve leads.yaml
+   python3 tools/parallax/parallax.py serve
    ```
-   Parallax opens in your browser, editable. On macOS you can add a double-click launcher `Parallax.command`:
-   `cd "$(dirname "$0")" && exec python3 tools/parallax/parallax.py serve leads.yaml` (then `chmod +x Parallax.command`).
-3. **Connect your agents** (optional, but that is the point): add one line to your `AGENTS.md` / `CLAUDE.md`, e.g. *"The research registry follows `tools/parallax/SKILL.md`."* Agents then know the schema, the rules and the rituals.
-4. **Guardrail** (optional): a versioned `pre-commit` hook running `python3 tools/parallax/parallax.py check leads.yaml --git`, enabled with `git config core.hooksPath .githooks`.
+   If the repository has no registry yet, Parallax opens a "New project" page: title, description, owner (your initials), an optional first theme, and three options:
+   - **agent instructions**: a Parallax section in `AGENTS.md`, imported by `CLAUDE.md`;
+   - **git guardrail**: a `pre-commit` hook that refuses commits breaking the registry;
+   - **macOS launcher**: `Parallax.command`, to open Parallax with a double-click.
+
+   It then creates `leads.yaml` and `INBOX.md` and shows the normal interface. The same can be done from the command line, e.g. for an agent:
+   `python3 tools/parallax/parallax.py init --title "…" --owner A.B. --agents --hook`.
 
 Day to day:
 - Collaborators clone with `git clone --recurse-submodules …` (or run `git submodule update --init` afterwards).
@@ -74,6 +75,7 @@ Registries written with the French schema of Parallax 2 (`projet`, `pistes`, `st
 ## Files
 - `parallax.py`: validation, rendering, local server.
 - `template.html`: the interface (CSS + JS), data injected at render time.
+- `init.html`: the "New project" page, shown when there is no registry yet.
 - `vendor/js-yaml.min.js`: YAML in the browser (js-yaml 4.1.0, MIT licence).
 - `vendor/marked.min.js`: Markdown rendering for the reader (marked 12.0.2, MIT licence).
 - `SKILL.md`: guide for agents. `example/`: minimal registry.
@@ -82,7 +84,7 @@ Registries written with the French schema of Parallax 2 (`projet`, `pistes`, `st
 
 A researcher works on a conjecture with an AI agent that has access to the repository.
 
-1. **Setup.** She adds Parallax to the repository and asks the agent to build the registry from her existing notes. The agent creates a few themes and leads, each with a next step and a stopping criterion.
+1. **Setup.** She adds Parallax to the repository, starts it, and creates the project from the page that opens. She then asks the agent to build the registry from her existing notes. The agent creates a few themes and leads, each with a next step and a stopping criterion.
 2. **Choosing what to work on.** She opens Parallax (`parallax.py serve`), reads the tree of leads, corrects a few cards, and pins the lead she wants to start with. It now appears first under "Do now".
 3. **Work session.** She tells the agent `open small-cases`. The agent summarizes the lead and splits the work: it writes and runs a script checking the conjecture up to n = 12; meanwhile she checks the reduction lemma in `notes/reduction.md`. Both tasks appear in the lead's task list, with `who` set accordingly.
 4. **Side idea.** Halfway through, she thinks of a probabilistic argument and types `idea: try a second-moment argument` (or uses the capture field in Parallax). The idea goes to `INBOX.md`; the session stays on the current lead.

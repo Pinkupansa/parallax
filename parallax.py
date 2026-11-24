@@ -28,6 +28,7 @@ except ImportError:  # pragma: no cover
 
 HERE = Path(__file__).resolve().parent
 TEMPLATE = HERE / "template.html"
+INIT_PAGE = HERE / "init.html"
 VERSION = "3.0"
 NAME = "Parallax"
 MD_EXT = (".md", ".markdown")
@@ -192,8 +193,10 @@ def validate(reg: dict, r: Report, base: Path | None = None) -> None:
     if not isinstance(project, dict) or not project.get("title"):
         r.err("project.title is required")
     leads = reg.get("leads")
-    if not isinstance(leads, list) or not leads:
-        r.err("the 'leads' list is empty or missing")
+    if leads is None:
+        leads = []
+    if not isinstance(leads, list):
+        r.err("'leads' must be a list")
         return
     statuses = reg["_statuses"]
     ids: dict[str, dict] = {}
@@ -473,6 +476,147 @@ def build(source: Path, output: Path | None, check_only: bool, strict: bool, git
     return 0
 
 
+# ============================================================================ project creation
+AGENTS_SECTION = """
+## Research registry (Parallax)
+
+The research leads of this project are kept in `{registry}`, raw ideas in `INBOX.md`.
+Follow `{skill}`: schema, rules and rituals (`open`, `idea`, `triage`, `close`, `review`).
+After every change to the registry, run `{check}`.
+"""
+
+HOOK = """#!/bin/sh
+# Parallax guardrail: the registry must stay valid; no lead or journal entry may disappear.
+top=$(git rev-parse --show-toplevel) || exit 1
+cd "$top" || exit 1
+if git diff --cached --name-only | grep -Eq '^({registry_re}|INBOX\\.md)$'; then
+  PY=$(command -v python3 || command -v python)
+  "$PY" {module}/parallax.py check {registry} --git || {{ echo "Commit refused: fix {registry} (see above)."; exit 1; }}
+fi
+exit 0
+"""
+
+
+def _git(base: Path, *args):
+    import subprocess
+    try:
+        return subprocess.run(["git", "-C", str(base), *args], capture_output=True, text=True)
+    except OSError:
+        return None
+
+
+def module_location(base: Path):
+    """Path of this module relative to the project, or None if Parallax lives outside it."""
+    try:
+        return HERE.relative_to(base.resolve()).as_posix()
+    except ValueError:
+        return None
+
+
+def project_context(base: Path, registry: str) -> dict:
+    g = _git(base, "rev-parse", "--is-inside-work-tree")
+    name = _git(base, "config", "user.name")
+    name = name.stdout.strip() if name and name.returncode == 0 else ""
+    return {"folder": str(base.resolve()), "registry": registry,
+            "git": bool(g and g.returncode == 0), "inside": module_location(base) is not None,
+            "owner": name}
+
+
+def slugify(t: str) -> str:
+    t = unicodedata.normalize("NFD", t)
+    t = "".join(c for c in t if not unicodedata.combining(c)).lower()
+    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")[:40] or "theme"
+
+
+def create_project(base: Path, registry: str = "leads.yaml", title: str = "", description: str = "",
+                   owner: str = "", theme: str = "", agents: bool = False, hook: bool = False,
+                   launcher: bool = False) -> list[str]:
+    """Create the registry (+ INBOX.md, optional agent instructions, hook, launcher). Returns what was done."""
+    base = base.resolve()
+    reg_path = base / registry
+    if reg_path.exists():
+        raise FileExistsError(f"{registry} already exists")
+    title, owner = title.strip(), owner.strip()
+    if not title:
+        raise ValueError("a project title is required")
+    done = []
+    today = dt.date.today().isoformat()
+    project = {"title": title}
+    if description.strip():
+        project["description"] = description.strip()
+    if owner:
+        project["owner"] = owner
+    doc = {"project": project, "leads": []}
+    if theme.strip():
+        doc["leads"].append({"id": slugify(theme), "type": "theme", "title": theme.strip()})
+    doc["journal"] = [{"date": today, "type": "decision", "author": owner or "human", "text": "Project created with Parallax."}]
+    reg_path.write_text("# Research leads — edited by hand, by agents, or from Parallax.\n"
+                        + yaml.safe_dump(doc, sort_keys=False, allow_unicode=True, width=1000), encoding="utf-8")
+    done.append(f"created {registry}")
+    inbox = base / "INBOX.md"
+    if not inbox.exists():
+        inbox.write_text("# Inbox — ideas to triage\n\nOne idea per \"- \" bullet; they are triaged into leads later.\n\n", encoding="utf-8")
+        done.append("created INBOX.md")
+
+    rel = module_location(base)
+    if agents:
+        if rel is not None:
+            skill, check = f"{rel}/SKILL.md", f"python3 {rel}/parallax.py check {registry} --git"
+        else:
+            (base / ".parallax").mkdir(exist_ok=True)
+            (base / ".parallax" / "SKILL.md").write_text((HERE / "SKILL.md").read_text(encoding="utf-8"), encoding="utf-8")
+            skill, check = ".parallax/SKILL.md", f"python3 {HERE}/parallax.py check {registry} --git"
+            done.append("copied SKILL.md to .parallax/")
+        agents_md = base / "AGENTS.md"
+        section = AGENTS_SECTION.format(registry=registry, skill=skill, check=check)
+        if agents_md.exists():
+            agents_md.write_text(agents_md.read_text(encoding="utf-8").rstrip("\n") + "\n" + section, encoding="utf-8")
+            done.append("added a Parallax section to AGENTS.md")
+        else:
+            agents_md.write_text("# Instructions for agents\n" + section, encoding="utf-8")
+            done.append("created AGENTS.md")
+        claude_md = base / "CLAUDE.md"
+        if not claude_md.exists():
+            claude_md.write_text("@AGENTS.md\n", encoding="utf-8")
+            done.append("created CLAUDE.md (imports AGENTS.md)")
+        elif "AGENTS.md" not in claude_md.read_text(encoding="utf-8"):
+            claude_md.write_text(claude_md.read_text(encoding="utf-8").rstrip("\n") + "\n\n@AGENTS.md\n", encoding="utf-8")
+            done.append("CLAUDE.md now imports AGENTS.md")
+
+    if hook:
+        g = _git(base, "rev-parse", "--is-inside-work-tree")
+        hook_path = base / ".githooks" / "pre-commit"
+        if not (g and g.returncode == 0):
+            done.append("hook skipped: not a git repository")
+        elif rel is None:
+            done.append("hook skipped: Parallax is not inside the project (collaborators could not run it)")
+        elif hook_path.exists():
+            done.append("hook skipped: .githooks/pre-commit already exists")
+        else:
+            hook_path.parent.mkdir(exist_ok=True)
+            hook_path.write_text(HOOK.format(module=rel, registry=registry, registry_re=re.escape(registry)), encoding="utf-8")
+            hook_path.chmod(0o755)
+            cur = _git(base, "config", "core.hooksPath")
+            cur = cur.stdout.strip() if cur and cur.returncode == 0 else ""
+            if cur in ("", ".githooks"):
+                _git(base, "config", "core.hooksPath", ".githooks")
+                done.append("added .githooks/pre-commit (enabled)")
+            else:
+                done.append(f"added .githooks/pre-commit (not enabled: core.hooksPath is {cur})")
+
+    if launcher:
+        cmd = base / "Parallax.command"
+        if cmd.exists():
+            done.append("launcher skipped: Parallax.command already exists")
+        else:
+            target = f"{rel}/parallax.py" if rel is not None else str(HERE / "parallax.py")
+            cmd.write_text(f'#!/bin/sh\n# Double-click (macOS): opens Parallax. Closing this window stops it.\n'
+                           f'cd "$(dirname "$0")" || exit 1\nexec python3 "{target}" serve {registry}\n', encoding="utf-8")
+            cmd.chmod(0o755)
+            done.append("created Parallax.command")
+    return done
+
+
 # ============================================================================ local server
 def serve(source: Path, port: int, open_browser: bool) -> int:
     import http.server
@@ -556,6 +700,12 @@ def serve(source: Path, port: int, open_browser: bool) -> int:
             if u.path in ("/", "/index.html"):
                 if not self._guard(False):
                     return
+                if not source.exists():  # no registry yet: project creation page
+                    ctx = project_context(base, source.name)
+                    ctx["token"] = token
+                    page = INIT_PAGE.read_text(encoding="utf-8").replace(
+                        "/*__CONTEXT__*/null", json.dumps(ctx, ensure_ascii=False).replace("</", "<\\/"))
+                    return self._send(200, page.encode("utf-8"), "text/html; charset=utf-8")
                 reg, data, r = analyse(source)
                 if reg is None:
                     msg = "<h1>Parallax</h1><p>Unreadable registry:</p><pre>" + "\n".join(r.errors).replace("<", "&lt;") + "</pre>"
@@ -625,7 +775,20 @@ def serve(source: Path, port: int, open_browser: bool) -> int:
             return self._json(200, {"mtime": new})
 
         def do_POST(self):
-            if urllib.parse.urlsplit(self.path).path != "/api/commit" or not self._guard(True):
+            path = urllib.parse.urlsplit(self.path).path
+            if path == "/api/init" and self._guard(True):
+                try:
+                    d = self._body()
+                    with lock:
+                        done = create_project(base, source.name, str(d.get("title") or ""), str(d.get("description") or ""),
+                                              str(d.get("owner") or ""), str(d.get("theme") or ""),
+                                              bool(d.get("agents")), bool(d.get("hook")), bool(d.get("launcher")))
+                except FileExistsError as exc:
+                    return self._json(409, {"error": str(exc)})
+                except ValueError as exc:
+                    return self._json(422, {"error": str(exc)})
+                return self._json(200, {"ok": True, "done": done})
+            if path != "/api/commit" or not self._guard(True):
                 return self._json(404, {"error": "not found"}) if self._host_ok() else None
             try:
                 d = self._body()
@@ -655,6 +818,8 @@ def serve(source: Path, port: int, open_browser: bool) -> int:
         return 1
     url = f"http://127.0.0.1:{srv.server_port}/"
     print(f"{NAME} — {source.name} — {url}")
+    if not source.exists():
+        print(f"No {source.name} here yet: the page offers to create the project.")
     print("Close this window (or press Ctrl-C) to stop Parallax.")
     if open_browser:
         webbrowser.open(url)
@@ -687,11 +852,29 @@ def main() -> None:
     b.add_argument("-o", "--output", type=Path)
     b.add_argument("--git", action="store_true")
     b.add_argument("--strict", action="store_true")
+    i = sub.add_parser("init", help="create a new project (registry and inbox) in a folder")
+    i.add_argument("folder", type=Path, nargs="?", default=Path("."))
+    i.add_argument("--title", required=True)
+    i.add_argument("--description", default="")
+    i.add_argument("--owner", default="", help="initials of the human in charge")
+    i.add_argument("--theme", default="", help="a first theme (optional)")
+    i.add_argument("--registry", default="leads.yaml")
+    i.add_argument("--agents", action="store_true", help="add agent instructions (AGENTS.md, CLAUDE.md)")
+    i.add_argument("--hook", action="store_true", help="add a git pre-commit guardrail")
+    i.add_argument("--launcher", action="store_true", help="add a macOS double-click launcher")
     c = sub.add_parser("check", help="validate the registry")
     c.add_argument("registry", type=Path, nargs="?")
     c.add_argument("--git", action="store_true", help="guardrails against the last commit")
     c.add_argument("--strict", action="store_true")
     a = ap.parse_args(argv)
+    if a.cmd == "init":
+        try:
+            done = create_project(a.folder, a.registry, a.title, a.description, a.owner, a.theme, a.agents, a.hook, a.launcher)
+        except (FileExistsError, ValueError) as exc:
+            sys.exit(f"init: {exc}")
+        print("\n".join(f"- {x}" for x in done))
+        print(f"Next: python3 {Path(sys.argv[0]).as_posix()} serve {(a.folder / a.registry).as_posix()}")
+        sys.exit(0)
     reg = a.registry or default_registry()
     if a.cmd == "serve":
         sys.exit(serve(reg, a.port, not a.no_open))
