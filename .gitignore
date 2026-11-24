@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+parallax.html
+.*.parallax-tmp
+.DS_Store

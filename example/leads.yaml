@@ -1,0 +1,56 @@
+# Research leads — edited by hand, by agents, or from Parallax.
+project:
+  title: My research project
+  description: Minimal example registry. Replace with the central question of the project.
+  owner: A.B.
+leads:
+  - id: theme-a
+    type: theme
+    title: First theme
+  - id: lead-1
+    parent: theme-a
+    title: A promising lead
+    status: ongoing
+    importance: 3
+    chance: 2
+    effort: M
+    validated: false
+    why: Would answer the main question; one known technical obstacle.
+    established:
+      - Special case checked
+    next: Treat the general case on an example.
+    stop: Counterexample to the general case.
+    todo:
+      - text: Write the general case
+        done: false
+        who: claude
+      - text: Re-read the special case
+        done: false
+        who: A.B.
+    updated: 2026-01-01
+  - id: lead-2
+    parent: theme-a
+    title: A more modest variant
+    status: idea
+    importance: 1
+    chance: 3
+    effort: S
+    validated: false
+    next: Write the computation on one page.
+    stop: The computation gives nothing new.
+    todo:
+      - text: english task
+        done: false
+    updated: 2026-11-24
+  - id: lead-3
+    title: A documented dead end
+    status: stopped
+    importance: 2
+    chance: 1
+    effort: L
+    obstacle: Obstruction in principle, see the journal.
+journal:
+  - date: 2026-01-01
+    type: stop
+    lead: lead-3
+    text: "Stopped: obstruction in principle."
