@@ -9,7 +9,7 @@ description: Keep the registry of research leads of a project (leads.yaml, INBOX
 
 Parallax keeps the state of a research project in **a single data file**, `leads.yaml`. It renders a self-contained HTML page from it: importance × chance matrix, tree, journal + inbox, task list, sortable list, and project-specific views.
 
-The researcher must see at a glance what has been explored, what matters, and what is likely to work. They must also be able to drop an idea on you without friction. **Your role:** keep the registry exact and up to date, and never let a conversation lose its thread.
+The researcher must see at a glance what has been explored, what matters, and what is likely to work. They must also be able to drop an idea on you without friction. **Your role:** keep the registry exact and up to date, and never let a conversation lose its thread. Priority ratings (importance × chance) are an optional aid to sort leads, not the core of the registry.
 
 ## Files (in the project repository)
 
@@ -89,19 +89,16 @@ journal:
 
 ## Rules
 
-1. **Ratings belong to the human.**
-   - You propose `importance`, `chance` and `effort` with a `why`, and set `validated: false`.
-   - You only set `validated: true` on explicit confirmation.
-   - Be calibrated: `chance: 3` means "I expect this to work". No complacent optimism.
-2. **A lead is never deleted.**
+1. **A lead is never deleted.**
    - A dead end becomes `stopped`, with the reason in `obstacle`, plus a journal entry `type: stop`.
    - The history of dead ends prevents exploring them again.
-3. **Every status change produces a journal entry**, dated and linked to the lead. Update `updated` too.
-4. **An active lead always has a concrete `next` action**, doable in one session, and a `stop` criterion.
-5. **The `id` is stable.** Journal links and URLs depend on it.
-6. **What is established is checked.** An `established` item is a fact (proof, computation, verified reference), never a conjecture. Conjectures go into `summary`.
-7. **No duplicates.** Before creating a lead, check whether an existing one covers the idea. If so, enrich it or create a sub-lead with `parent`.
-8. **Share the work.** Whenever you start a task, propose one relevant, complementary thing for the human to do meanwhile (something that does not wait for your result and that a human does better), and record shared tasks in `todo` with `who`.
+2. **Every status change produces a journal entry**, dated and linked to the lead. Update `updated` too.
+3. **An active lead always has a concrete `next` action**, doable in one session, and a `stop` criterion.
+4. **The `id` is stable.** Journal links and URLs depend on it.
+5. **What is established is checked.** An `established` item is a fact (proof, computation, verified reference), never a conjecture. Conjectures go into `summary`.
+6. **No duplicates.** Before creating a lead, check whether an existing one covers the idea. If so, enrich it or create a sub-lead with `parent`.
+7. **Share the work.** Whenever you start a task, propose one relevant, complementary thing for the human to do meanwhile (something that does not wait for your result and that a human does better), and record shared tasks in `todo` with `who`.
+8. **Ratings are optional and belong to the human.** If you propose `importance`, `chance` or `effort`, give a `why` and set `validated: false`; only the human sets them as validated. Be calibrated: `chance: 3` means "I expect this to work".
 
 ## Editing by the human
 
@@ -128,7 +125,7 @@ The human may call them by name, or you propose them at the right time.
 ### triage
 For each bullet of `INBOX.md`, propose one of:
 - **attach** to an existing lead (added to `summary`, `established` or `next`);
-- **new lead**, with an id, a parent, proposed ratings (`validated: false`), a `next` and a `stop`;
+- **new lead**, with an id, a parent, a `next` and a `stop` (and, if useful, proposed ratings with `validated: false`);
 - **reject**, with a journal entry `type: idea` saying why.
 
 Present all proposals at once, as a table. Apply what the human validates, remove the processed bullets from `INBOX.md`, run `check`, then rebuild.
@@ -143,7 +140,7 @@ Present all proposals at once, as a table. Apply what the human validates, remov
 ### review (from time to time)
 - List `ongoing` leads not updated for more than 3 weeks.
 - Spot leads whose stopping criterion seems reached.
-- Spot ratings still `validated: false`.
+- Spot proposals still awaiting the human's validation (`validated: false`).
 - Propose changes; apply nothing without agreement.
 
 ## Writing an extension (project-specific view)

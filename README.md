@@ -17,15 +17,16 @@ Python ≥ 3.8 and PyYAML. No other dependency: the interface is a single HTML f
 
 Parallax has three levels.
 
-1. **Agent behaviour (`SKILL.md`).** The skill file defines how AI agents maintain the project: the schema of the registry, the rules they follow (ratings are proposed by agents and validated by the human; leads are stopped, not deleted; the journal is append-only), and a few rituals (`open`, `idea`, `triage`, `close`, `review`). When an agent starts a task, it also proposes a task for the human that can be done in parallel, and both are recorded in the lead's task list.
+1. **Agent behaviour (`SKILL.md`).** The skill file defines how AI agents maintain the project: the schema of the registry, the rules they follow (leads are stopped, not deleted; the journal is append-only; decisions are left to the human), and a few rituals (`open`, `idea`, `triage`, `close`, `review`). When an agent starts a task, it also proposes a task for the human that can be done in parallel, and both are recorded in the lead's task list.
 
-2. **Repository structure (maintained by the agents).** The state of the research is kept in plain files: `leads.yaml` lists the research leads (status, importance, chance, effort, next step, stopping criterion, documents, tasks); `INBOX.md` collects untriaged ideas; the journal records what was established or decided. `parallax.py check` validates the registry and, with `--git`, rejects deleted leads or modified journal entries.
+2. **Repository structure (maintained by the agents).** The state of the research is kept in plain files: `leads.yaml` lists the research leads (status, next step, stopping criterion, documents, tasks, and optional priority ratings); `INBOX.md` collects untriaged ideas; the journal records what was established or decided. `parallax.py check` validates the registry and, with `--git`, rejects deleted leads or modified journal entries.
 
-3. **Visualization (`parallax.py serve`).** A local web interface displays the registry: a list of suggested leads (pinned first, then by importance × chance), an importance × chance matrix, a tree of themes, tasks by lead and by person, the inbox and the journal. Documents linked to a lead open in a Markdown/LaTeX reader at the referenced section. The registry can be edited from the interface; projects can add their own views as JavaScript extensions.
+3. **Visualization (`parallax.py serve`).** A local web interface displays the registry: the leads to work on now, a tree of themes, tasks by lead and by person, the inbox and the journal, and an optional priority matrix. Documents linked to a lead open in a Markdown/LaTeX reader at the referenced section. The registry can be edited from the interface; projects can add their own views as JavaScript extensions.
 
 ## Views
-- **Overview**: key figures, "Do now" (pinned leads, then highest importance × chance), progress by theme, recent activity, extension sections.
-- **Matrix** importance × chance; **Tree** of themes and sub-leads; **Tasks** (with who does what: the human or an agent); **Inbox**; **Journal**; sortable **List**.
+- **Overview**: key figures, "Do now" (pinned leads, then the highest-priority active leads if they are rated), progress by theme, recent activity, extension sections.
+- **Tree** of themes and sub-leads; **Tasks** (with who does what: the human or an agent); **Inbox**; **Journal**; sortable **List**.
+- **Matrix**: optional importance × chance ratings, as a rough aid to prioritize.
 - **Reader**: documents listed on a lead open in a built-in Markdown + MathJax reader, at the right section (`notes/x.md#Section`), or PDFs at the right page (`paper.pdf#page=4`).
 - **Extensions**: project-specific views in JS (`Parallax.view`, `Parallax.overviewSection`, `Parallax.detailSection` — see `SKILL.md`).
 
@@ -34,15 +35,15 @@ Parallax has three levels.
 
 ## Working with agents
 
-`SKILL.md` describes the schema and the rules for AI agents: ratings are proposed by agents and validated by the human, leads are stopped rather than deleted, the journal is append-only. Copy these rules into your project's `AGENTS.md` / `CLAUDE.md` so that every agent follows them.
+`SKILL.md` describes the schema and the rules for AI agents: leads are stopped rather than deleted, the journal is append-only, and decisions (such as validating priority ratings proposed by an agent) are left to the human. Copy these rules into your project's `AGENTS.md` / `CLAUDE.md` so that every agent follows them.
 
 It also defines five rituals, which the human invokes by name in a conversation with an agent:
 
 - **`open <id>`** — the agent reads the lead and its documents, summarizes it in at most five lines (goal, established results, obstacle, next action, stopping criterion), states how the work is split between agent and human, and stays on this lead for the rest of the session.
 - **`idea <text>`** — the agent appends the idea verbatim, with the date, to `INBOX.md`, then returns to the current topic.
-- **`triage`** — for each inbox item, the agent proposes to attach it to an existing lead, to create a new lead (with proposed ratings, next step and stopping criterion), or to reject it with a journal entry. It applies only what the human approves.
+- **`triage`** — for each inbox item, the agent proposes to attach it to an existing lead, to create a new lead (with a next step and a stopping criterion), or to reject it with a journal entry. It applies only what the human approves.
 - **`close`** — at the end of a session, the agent updates the lead (established results, obstacle, next step, status, tasks), adds one to three journal entries about what was established or decided, proposes rating changes for other leads if needed, validates the registry and commits. It ends with what changed, the next action, and what the human can do before the next session.
-- **`review`** — the agent lists ongoing leads not updated for three weeks, leads whose stopping criterion seems reached, and ratings not yet validated. It proposes changes without applying them.
+- **`review`** — the agent lists ongoing leads not updated for three weeks, leads whose stopping criterion seems reached, and proposals awaiting the human's validation. It proposes changes without applying them.
 
 ## Installation
 
@@ -81,12 +82,12 @@ Registries written with the French schema of Parallax 2 (`projet`, `pistes`, `st
 
 A researcher works on a conjecture with an AI agent that has access to the repository.
 
-1. **Setup.** She adds Parallax to the repository and asks the agent to build the registry from her existing notes. The agent creates a few themes and leads, each with a next step, a stopping criterion and proposed ratings marked `validated: false`.
-2. **Prioritization.** She opens Parallax (`parallax.py serve`), adjusts the ratings, validates them, and pins the lead she wants to start with. It now appears first under "Do now".
+1. **Setup.** She adds Parallax to the repository and asks the agent to build the registry from her existing notes. The agent creates a few themes and leads, each with a next step and a stopping criterion.
+2. **Choosing what to work on.** She opens Parallax (`parallax.py serve`), reads the tree of leads, corrects a few cards, and pins the lead she wants to start with. It now appears first under "Do now".
 3. **Work session.** She tells the agent `open small-cases`. The agent summarizes the lead and splits the work: it writes and runs a script checking the conjecture up to n = 12; meanwhile she checks the reduction lemma in `notes/reduction.md`. Both tasks appear in the lead's task list, with `who` set accordingly.
 4. **Side idea.** Halfway through, she thinks of a probabilistic argument and types `idea: try a second-moment argument` (or uses the capture field in Parallax). The idea goes to `INBOX.md`; the session stays on the current lead.
 5. **End of session.** She types `close`. The agent records what was established (the conjecture holds up to n = 12), updates the next step, adds a journal entry, validates the registry and commits. It ends with what she can do before the next session.
-6. **Every week or so.** `triage` turns the inbox into new leads or rejects ideas with a reason; `review` lists stale leads and ratings still to validate. A lead that turns out to be a dead end is set to `stopped` with its reason and stays visible in the tree, so that it is not explored again.
+6. **Every week or so.** `triage` turns the inbox into new leads or rejects ideas with a reason; `review` lists stale leads and leads whose stopping criterion seems reached. A lead that turns out to be a dead end is set to `stopped` with its reason and stays visible in the tree, so that it is not explored again.
 
 ## License
 
