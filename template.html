@@ -7,7 +7,7 @@
 <title>__TITLE__</title>
 <script>
 try{const t=localStorage.getItem("parallax.theme");if(t=="light"||t=="dark")document.documentElement.dataset.theme=t;}catch(e){}
-window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global',matchFontHeight:true,scale:1,minScale:.8},startup:{typeset:false}};
+window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'local',matchFontHeight:true,scale:1,minScale:.8},startup:{typeset:false}};
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
 <style>
@@ -439,7 +439,29 @@ const Parallax=(function(){
   index();
   const $=s=>document.querySelector(s);
   const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-  const txt=s=>esc(s).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+  const plain=s=>esc(s).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+  /* LaTeX is turned into SVG while the HTML string is built (once MathJax is loaded), so re-rendering a view
+     never shows the source for an instant; results are cached. Before MathJax is ready, the source is kept
+     and typeset() converts it afterwards. */
+  const MATH=/(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\$[^$\n]+?\$)/;
+  const mathCache=new Map();
+  function tex(m){
+    const disp=m.startsWith("$$")||m.startsWith("\\["),src=disp||m.startsWith("\\(")?m.slice(2,-2):m.slice(1,-1);
+    const key=(disp?"D":"I")+src;if(mathCache.has(key))return mathCache.get(key);
+    let out;try{out=MathJax.tex2svg(src,{display:disp}).outerHTML;}catch(e){out=esc(m);}
+    if(/data-mjx-error|merror/.test(out))out=esc(m);
+    mathCache.set(key,out);return out;}
+  const txt=s=>{s=String(s??"");
+    if(!(window.MathJax&&MathJax.tex2svg)||!MATH.test(s))return plain(s);
+    const parts=s.split(MATH);let h="";
+    for(let i=0;i<parts.length;i++){
+      if(i%2===0){h+=plain(parts[i]);continue;}
+      /* keep the math together with touching punctuation */
+      let pre="",post="";const prev=h.match(/[(\[«]+$/),next=(parts[i+1]||"").match(/^(?:[.,)\]%]+|[   ]?[;:!?»]+)/);
+      if(prev){pre=prev[0];h=h.slice(0,-pre.length);}
+      if(next){post=next[0].replace(/^[   ]/," ");parts[i+1]=parts[i+1].slice(next[0].length);}
+      const m=tex(parts[i]);h+=pre||post?`<span class="mjg">${pre}${m}${esc(post)}</span>`:m;}
+    return h;};
   const st=id=>D.statuses[id]||{label:id||"?",color:"#8E8E93",active:false};
   const isLead=p=>p.type!=="theme";
   const prio=p=>(p.importance||0)*(p.chance||0);
