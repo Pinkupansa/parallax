@@ -6,6 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>__TITLE__</title>
 <script>
+try{const t=localStorage.getItem("parallax.theme");if(t=="light"||t=="dark")document.documentElement.dataset.theme=t;}catch(e){}
 window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},svg:{fontCache:'global',matchFontHeight:true,scale:1,minScale:.8},startup:{typeset:false}};
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" async></script>
@@ -27,7 +28,18 @@ window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$
   --font:"Mona Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
   --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme:dark){:root{
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#101113;--side:#141518;--card:#17181B;--elev:#1C1D21;--paper:#1C1D21;
+  --fill:#28292E;--fill2:#1A1B1F;--line:#2A2B30;--line2:#3D3F45;
+  --label:#E8E9EB;--label2:#A2A5AB;--label3:#73767D;--sep:#232429;
+  --acc:#B4C2E6;--acc-t:rgba(180,194,230,.09);
+  --blue:#8FA8DC;--blue-t:rgba(143,168,220,.12);--green:#8DB877;--orange:#C59AC6;--red:#E08A72;--purple:#C59AC6;--gray:#73767D;
+  --hot:rgba(180,194,230,.05);--wash:7%;
+  --relief:0 0 0 1px rgba(255,255,255,.02) inset,2px 3px 0 rgba(0,0,0,.6);--relief-up:0 0 0 1px rgba(255,255,255,.03) inset,3px 5px 0 rgba(0,0,0,.65);
+  --shadow-pop:0 0 0 1px rgba(255,255,255,.06),0 12px 36px rgba(0,0,0,.7);
+}
+:root[data-theme="light"]{color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
   --bg:#101113;--side:#141518;--card:#17181B;--elev:#1C1D21;--paper:#1C1D21;
   --fill:#28292E;--fill2:#1A1B1F;--line:#2A2B30;--line2:#3D3F45;
   --label:#E8E9EB;--label2:#A2A5AB;--label3:#73767D;--sep:#232429;
@@ -139,22 +151,21 @@ code{font-family:var(--mono);font-size:.9em;background:var(--fill2);border:1px s
 
 /* overview */
 .intro{max-width:76ch;margin:4px 0 6px;font-size:14px;line-height:1.75;color:var(--label2)}
-.strip{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 40px;align-items:end;margin:8px 0 0;padding:16px 0 18px;border-bottom:1px solid var(--line)}
-.sbar{display:flex;gap:0;min-width:0}
-.sbar>button{flex:var(--n) 1 0;min-width:max-content;border:0;background:none;padding:0 16px 0 0;text-align:left;cursor:pointer;color:var(--label2);font-size:13px}
-.sbar>button i{display:block;height:10px;margin:0 -13px 7px 0;background:var(--c);border-radius:1px}
-.sbar>button.ring i{background:color-mix(in srgb,var(--c) 45%,var(--paper));box-shadow:inset 0 0 0 1.5px var(--c)}
-.sbar>button:first-child i{border-radius:3px 1px 1px 3px}.sbar>button:last-child{padding-right:0}.sbar>button:last-child i{margin-right:0;border-radius:1px 3px 3px 1px}
-.sbar>button b{font-size:19px;font-weight:700;color:var(--label);margin-right:5px}
-.sbar>button[aria-pressed="false"]{opacity:.35}
-.sbar>button:hover b{color:var(--acc)}
-.sact{display:flex;gap:10px}
-.sbtn{display:flex;align-items:baseline;gap:7px;padding:8px 14px;border:1px solid var(--line2);border-radius:var(--r);background:var(--elev);color:var(--label2);font-size:13px;cursor:pointer;box-shadow:var(--relief);text-decoration:none}
-.sbtn:hover{text-decoration:none;color:var(--label);transform:translate(-1px,-1px);box-shadow:var(--relief-up)}
-.sbtn b{font-size:19px;font-weight:700;color:var(--label)}
-.sbtn.zero{box-shadow:none;background:none;border-style:dashed}
-.sbtn.zero b{color:var(--label3)}
-.strip+h2.sec{margin-top:26px}
+.ledger{display:flex;flex-wrap:wrap;align-items:stretch;margin:40px 0 0;border-top:1px solid var(--line2);border-bottom:1px solid var(--line)}
+.lc{display:flex;flex-direction:column;justify-content:flex-start;gap:1px;padding:11px 26px 12px;border:0;border-left:1px solid var(--line);background:none;color:inherit;text-align:left;font:inherit;min-width:0}
+.lc:first-child{border-left:0;padding-left:2px}
+.lc .lk{font-size:12px;color:var(--label3)}
+.lc .ln{font-size:27px;line-height:1.15;font-weight:600;color:var(--label)}
+.lc .ls{font-size:12.5px;color:var(--label2);white-space:nowrap}
+.ledger .gap{flex:1;border-left:0}
+.lc.go{cursor:pointer;text-decoration:none}
+.lc.go .ln{color:var(--acc)}
+.lc.go .ls{color:var(--acc)}
+.lc.go:hover{background:var(--fill2);text-decoration:none}
+.lc.zero .ln,.lc.zero .ls{color:var(--label3)}
+.ledger+h2.sec{margin-top:34px}
+.view>.ledger:first-child{margin-top:4px}
+.pcard.is-sel{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),var(--relief)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px 20px;padding:2px 4px 6px 0}
 .pcard{position:relative;padding:16px 20px 14px;text-align:left;cursor:pointer;color:inherit;display:flex;flex-direction:column;gap:8px;background:linear-gradient(12deg,color-mix(in srgb,var(--c,var(--acc)) var(--wash),var(--paper)) 0%,var(--paper) 60%);transition:transform .12s ease,box-shadow .12s ease}
 .pcard:hover{transform:translate(-1px,-2px);box-shadow:var(--relief-up)}
@@ -392,7 +403,7 @@ mjx-container:not([display="true"]){margin:0 .08em}
 <body>
 <div class="app" id="app">
   <aside class="side">
-    <div class="brand"><span class="mk" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="l" d="M5 18.5L12 6.5L19 18.5"/><circle cx="5" cy="18.5" r="2.3"/><circle cx="19" cy="18.5" r="2.3"/><circle cx="12" cy="6.5" r="2.6"/></svg></span><b>Parallax</b></div>
+    <div class="brand"><span class="mk" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="l" d="M5 18.5L12 6.5L19 18.5"/><circle cx="5" cy="18.5" r="2.3"/><circle cx="19" cy="18.5" r="2.3"/><circle cx="12" cy="6.5" r="2.6"/></svg></span><b>Parallax</b><button class="ico" id="btheme" style="margin-left:auto"></button></div>
     <div class="proj" id="proj"></div>
     <nav class="nav" id="nav" aria-label="Views"></nav>
     <div class="side-h">Statuses</div>
@@ -469,6 +480,9 @@ const Parallax=(function(){
   const dot=p=>`<span class="dot${ring(p.status)}" style="--c:${st(p.status).color}"></span>`;
   const pill=p=>`<span class="pill" style="--c:${st(p.status).color}"><span class="dot${ring(p.status)}" style="--c:${st(p.status).color}"></span>${esc(st(p.status).label)}</span>`;
   const IC={
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>',
+    moon:'<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>',
+    auto:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17a8.5 8.5 0 0 0 0-17z" fill="currentColor"/>',
     overview:'<rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/>',
     matrix:'<path d="M4 4v16h16"/><circle cx="9" cy="14" r="1.6"/><circle cx="13.5" cy="9.5" r="1.6"/><circle cx="17.5" cy="6" r="1.6"/>',
     coverage:'<rect x="3" y="9" width="18" height="6" rx="3"/><path d="M12 9v6"/>',
@@ -504,8 +518,15 @@ const Parallax=(function(){
     document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{state.view=b.dataset.v;chrome();renderView();updateHash();$("#main").scrollTop=0;});
     $("#chips").innerHTML=Object.entries(D.statuses).map(([k,v])=>`<button data-s="${esc(k)}" aria-pressed="${state.statuses.has(k)}"><span class="dot${v.ring?" ring":""}" style="--c:${v.color};background:${v.color}"></span>${esc(v.label)}<span class="ct">${n.filter(p=>p.status===k).length}</span></button>`).join("");
     document.querySelectorAll("#chips button").forEach(b=>b.onclick=()=>{const s=b.dataset.s;state.statuses.has(s)?state.statuses.delete(s):state.statuses.add(s);chrome();renderView();});
-    toolbar();syncPanel();
+    themeButton();toolbar();syncPanel();
   }
+  function themeButton(){const b=$("#btheme");if(!b)return;
+    const cur=document.documentElement.dataset.theme||"auto",L={auto:"Theme: follows the system",light:"Theme: light",dark:"Theme: dark"};
+    b.innerHTML=ic(cur==="auto"?"auto":cur==="dark"?"moon":"sun",15);b.title=L[cur]+" (click to change)";b.setAttribute("aria-label",L[cur]);
+    b.onclick=()=>{const nx={auto:"light",light:"dark",dark:"auto"}[cur];
+      if(nx==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=nx;
+      try{nx==="auto"?localStorage.removeItem("parallax.theme"):localStorage.setItem("parallax.theme",nx);}catch(e){}
+      themeButton();};}
   let tbKey="";
   function toolbar(){
     const v=views.find(x=>x.id===state.view);
@@ -551,12 +572,12 @@ const Parallax=(function(){
     const v=views.find(x=>x.id===state.view);const el=$("#view");
     toolbar();
     if(!v){el.innerHTML='<p class="empty">No view.</p>';return;}
-    try{v.render(el,ctx);wrapSec(el);}catch(e){el.innerHTML=`<p class="empty">Error in view "${esc(v.title)}": ${esc(e.message)}</p>`;console.error(e);}
+    try{v.render(el,ctx);wrapSec(el);if(v.stable)el.querySelectorAll("[data-id]").forEach(b=>b.classList.toggle("is-sel",b.dataset.id===state.sel));}catch(e){el.innerHTML=`<p class="empty">Error in view "${esc(v.title)}": ${esc(e.message)}</p>`;console.error(e);}
     typeset(el);
   }
 
   /* ---------- inspector ---------- */
-  function closeInspector(){state.sel=null;ED.editing=null;ED.creating=null;$("#app").classList.remove("insp");renderView();updateHash();}
+  function closeInspector(){state.sel=null;ED.editing=null;ED.creating=null;$("#app").classList.remove("insp");refreshSelection();updateHash();}
   const whoTag=t=>t&&t.who?`<span class="owner-tag${String(t.who)===String(D.project.owner||"")?" mine":""}" title="Who takes it">${esc(t.who)}</span>`:"";
   function taskList(p){
     const td=p.todo||[];
@@ -628,8 +649,12 @@ const Parallax=(function(){
     if(ED.editing&&ED.editing!==id)ED.editing=null;
     ED.creating=null;
     state.sel=id;chain(id).forEach(a=>state.open.add(a.id));
-    renderDetail();renderView();updateHash();
+    renderDetail();refreshSelection();updateHash();
   }
+  /* views that do not depend on the selection keep their DOM (no MathJax re-typesetting); only the highlight moves */
+  function refreshSelection(){const v=views.find(x=>x.id===state.view);
+    if(v&&v.stable)document.querySelectorAll("#view [data-id]").forEach(b=>b.classList.toggle("is-sel",b.dataset.id===state.sel));
+    else renderView();}
   function updateHash(){try{history.replaceState(null,"","#"+state.view+(state.sel?"/"+state.sel:""));}catch(e){}}
   function refresh(nd){
     const before=new Set(Object.keys(byId));
@@ -926,22 +951,27 @@ const Parallax=(function(){
   })();
 
   /* ===================== VIEWS ===================== */
-  const vOverview={id:"overview",title:"Overview",always:true,
+  /* figures at a glance: leads by status, open tasks, ideas to triage */
+  function ledger(){const n=D.leads.filter(isLead);
+    const S=Object.entries(D.statuses),cnt=k=>n.filter(p=>p.status===k).length;
+    const act=S.filter(([k,v])=>v.active),inact=S.filter(([k,v])=>!v.active);
+    const nAct=act.reduce((a,[k])=>a+cnt(k),0),ot=openTasks(),ni=D.inbox.length;
+    const cell=(k,num,sub,cls,go)=>`<${go?`a href="#${go}" data-go="${go}"`:"div"} class="lc${cls?" "+cls:""}"><span class="lk">${k}</span><span class="ln">${num}</span>${sub?`<span class="ls">${sub}</span>`:""}</${go?"a":"div"}>`;
+        return `<div class="ledger">${cell("Active leads",nAct,act.map(([k,v])=>{const c=cnt(k),l=v.label.toLowerCase();return `${c} ${esc(c>1&&/^[a-z]+$/.test(l)&&!/(ed|ing|s|done)$/.test(l)?l+"s":l)}`;}).join(" · "))}${inact.map(([k,v])=>cell(esc(v.label),cnt(k))).join("")}<span class="gap"></span>${cell("Open tasks",ot,ot?"See tasks →":"Nothing left",ot?"go":"go zero","tasks")}${cell("To triage",ni,ni?"Open the inbox →":"Inbox is empty",ni?"go":"go zero","inbox")}</div>`;}
+  function bindLedger(el){el.querySelectorAll("[data-go]").forEach(b=>b.onclick=e=>{e.preventDefault();state.view=b.dataset.go;chrome();renderView();updateHash();});}
+  const vOverview={id:"overview",title:"Overview",always:true,stable:true,
         render(el){
       const n=D.leads.filter(isLead);
       const pinned=n.filter(p=>p.pinned&&p.status!=="stopped").sort(order);
       /* pinned leads, then active leads: rated ones by priority, the others by most recent update */
       const best=n.filter(p=>!p.pinned&&st(p.status).active).sort(order).slice(0,Math.max(0,(D.project.top||3)-pinned.length));
       const now=pinned.concat(best).filter(matches);
-      const segs=Object.entries(D.statuses).map(([k,v])=>[k,v,n.filter(p=>p.status===k).length]).filter(x=>x[2]);
-      const ot=openTasks(),ni=D.inbox.length;
-      let h=`<div class="strip"><div class="sbar" role="group" aria-label="Leads by status">${segs.map(([k,v,c])=>`<button data-st="${esc(k)}" class="${v.ring?"ring":""}" style="--n:${c};--c:${v.color}" aria-pressed="${state.statuses.has(k)}" title="Show or hide ${esc(v.label)}"><i></i><b>${c}</b>${esc(v.label)}</button>`).join("")}</div>
-        <div class="sact"><a class="sbtn${ot?"":" zero"}" data-go="tasks"><b>${ot}</b>${ot===1?"open task":"open tasks"}</a><a class="sbtn${ni?"":" zero"}" data-go="inbox"><b>${ni}</b>${ni===1?"idea to triage":"ideas to triage"}</a></div></div>
-        <h2 class="sec">Do now</h2>`;
+      let h=`<h2 class="sec">Do now</h2>`;
       h+=now.length?`<div class="cards">${now.map(p=>{const td=(p.todo||[]).filter(t=>!t.done).length;
         return `<button class="pcard" data-id="${esc(p.id)}" style="--c:${st(p.status).color}">
           <div class="t">${txt(p.title)}</div><div class="nx"><div><b>Next:</b> ${txt(p.next||"to be defined")}</div><div class="ft">${p.pinned?`<span>Pinned</span>`:""}${td?`<span>${plural(td,"open task")}</span>`:""}<span class="st">${esc(st(p.status).label)}</span></div></div></button>`;}).join("")}</div>`:`<p class="empty">No active lead.</p>`;
       overviewSections.forEach(f=>{try{const x=f(ctx);if(x)h+=x;}catch(e){console.error(e);}});
+      h+=ledger();
       const themes=D.leads.filter(p=>p.type==="theme");
       if(themes.length){
         const desc=id=>{const out=[];const stack=[...(byId[id]._kids||[])];while(stack.length){const c=byId[stack.pop()];if(!c)continue;if(isLead(c))out.push(c);stack.push(...(c._kids||[]));}return out;};
@@ -954,7 +984,6 @@ const Parallax=(function(){
       el.innerHTML=h;
       el.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>select(b.dataset.id));
       el.querySelectorAll("[data-go]").forEach(b=>b.onclick=e=>{e.preventDefault();state.view=b.dataset.go;chrome();renderView();updateHash();});
-      el.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const k=b.dataset.st;state.statuses.has(k)?state.statuses.delete(k):state.statuses.add(k);chrome();renderView();});
       const tj=el.querySelector("#tojr");if(tj)tj.onclick=e=>{e.preventDefault();state.view="journal";chrome();renderView();updateHash();};
     }};
 
@@ -1007,7 +1036,7 @@ const Parallax=(function(){
   let showDone=false,whoFilter="";
   const whoOk=t=>!whoFilter||(whoFilter==="mine"?String(t.who||"")===String(D.project.owner||""):(t.who&&String(t.who)!==String(D.project.owner||"")));
   const taskOk=t=>(showDone||!t.done)&&whoOk(t);
-  const vTasks={id:"tasks",title:"Tasks",always:true,subtitle:()=>plural(openTasks(),"open task"),render(el){
+  const vTasks={id:"tasks",title:"Tasks",always:true,stable:true,subtitle:()=>plural(openTasks(),"open task"),render(el){
     const ps=visible().filter(p=>(p.todo||[]).some(taskOk)).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||order(a,b));
     el.innerHTML=`<div class="foot" style="justify-content:flex-start;margin:0 0 10px"><label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--label2)">${'<span class="tg"><input type="checkbox" id="tdall" '+(showDone?"checked":"")+'><span></span></span>'}Show completed tasks</label><span style="flex:1"></span><div class="seg" id="tdwho" role="group" aria-label="Who">${[["","All"],["mine",esc(D.project.owner||"Mine")],["agents","Agents"]].map(([v,l])=>`<button type="button" data-v="${v}" aria-pressed="${whoFilter===v}">${l}</button>`).join("")}</div></div>`+
       (ps.length?`<div class="card">${ps.map(p=>`<div class="task-group" data-pid="${esc(p.id)}"><h4>${dot(p)}<a data-id="${esc(p.id)}">${txt(p.title)}</a></h4>
@@ -1019,7 +1048,7 @@ const Parallax=(function(){
     el.querySelectorAll(".task-group").forEach(g=>g.querySelectorAll("input[data-td]").forEach(c=>c.onchange=()=>ED.op.toggleTask(g.dataset.pid,+c.dataset.td)));
   }};
 
-  const vInbox={id:"inbox",title:"Inbox",always:true,subtitle:()=>D.inbox.length?`${plural(D.inbox.length,"idea")} to triage`:"Everything is triaged",render(el){
+  const vInbox={id:"inbox",title:"Inbox",always:true,stable:true,subtitle:()=>D.inbox.length?`${plural(D.inbox.length,"idea")} to triage`:"Everything is triaged",render(el){
     let h=ED.active?`<div class="card capture">${ic("plus",18)}<input id="ibnew" placeholder="New idea — press Enter to add it"></div><div style="height:14px"></div>`:"";
     h+=D.inbox.length?`<div class="card">${D.inbox.map((i,k)=>`<div class="idea"><div style="min-width:0">${i.date?`<div class="d">${esc(i.date)}</div>`:""}<div>${txt(i.text)}</div></div>
         ${ED.active?`<div class="act"><button class="btn sm pri" data-ip="${k}">Create a lead</button><button class="btn sm bad" data-ix="${k}">Delete</button></div>`:""}</div>`).join("")}</div>`
@@ -1042,14 +1071,14 @@ const Parallax=(function(){
   }};
 
   let listSort={k:"prio",d:-1};
-  const vList={id:"list",title:"List",subtitle:()=>"Click a header to sort",render(el){
+  const vList={id:"list",title:"List",stable:true,subtitle:()=>"Click a header to sort",render(el){
     const cols=[["title","Lead"],["status","Status"],["importance","I"],["chance","C"],["prio","I×C"],["effort","Effort"],["next","Next step"],["updated","Updated"]];
     const val=(p,k)=>k==="prio"?prio(p):k==="effort"?(EFF[p.effort]||0):k==="status"?st(p.status).label:(p[k]??"");
     const ps=visible().sort((a,b)=>{const x=val(a,listSort.k),y=val(b,listSort.k);return (typeof x==="number"&&typeof y==="number"?x-y:String(x).localeCompare(String(y)))*listSort.d;});
-    el.innerHTML=`<div class="card" style="overflow:auto"><table><thead><tr>${cols.map(([k,l])=>`<th data-k="${k}">${l}${listSort.k===k?(listSort.d>0?" ↑":" ↓"):""}</th>`).join("")}</tr></thead><tbody>
+    el.innerHTML=`${ledger()}<div class="card" style="overflow:auto;margin-top:18px"><table><thead><tr>${cols.map(([k,l])=>`<th data-k="${k}">${l}${listSort.k===k?(listSort.d>0?" ↑":" ↓"):""}</th>`).join("")}</tr></thead><tbody>
       ${ps.map(p=>`<tr class="click" data-id="${esc(p.id)}"><td style="font-weight:500">${txt(p.title)}</td><td style="white-space:nowrap">${pill(p)}</td><td class="c">${p.importance??""}</td><td class="c">${p.chance??""}</td><td class="c">${prio(p)||""}</td><td class="c">${esc(p.effort||"")}</td><td class="muted">${txt(p.next||"")}</td><td class="c" style="white-space:nowrap">${esc(p.updated||"")}</td></tr>`).join("")}</tbody></table></div>`;
     el.querySelectorAll("th").forEach(h=>h.onclick=()=>{const k=h.dataset.k;listSort=listSort.k===k?{k,d:-listSort.d}:{k,d:k==="title"||k==="status"?1:-1};renderView();});
-    el.querySelectorAll("tr.click").forEach(r=>r.onclick=()=>select(r.dataset.id));
+    el.querySelectorAll("tr.click").forEach(r=>r.onclick=()=>select(r.dataset.id));bindLedger(el);
   }};
 
   /* ---------- Document reader (rendered Markdown, MathJax) ----------
